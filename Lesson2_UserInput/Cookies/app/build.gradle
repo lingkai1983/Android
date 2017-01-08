@@ -4,7 +4,7 @@ android {
     compileSdkVersion 25
     buildToolsVersion "25.0.0"
     defaultConfig {
-        applicationId "com.example.android.justjava"
+        applicationId "com.example.android.cookies"
         minSdkVersion 15
         targetSdkVersion 25
         versionCode 1
@@ -26,5 +26,4 @@ dependencies {
     })
     compile 'com.android.support:appcompat-v7:25.1.0'
     testCompile 'junit:junit:4.12'
-    compile 'org.jetbrains:annotations-java5:15.0'
 }
