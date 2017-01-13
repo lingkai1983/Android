@@ -19,6 +19,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -28,10 +29,50 @@ public class MainActivity extends AppCompatActivity {
 
         // Set the content of the activity to use the activity_main.xml layout file
         setContentView(R.layout.activity_main);
+
+        // There are four listeners Color, Family, Number and Phrase
+
+        // Number and color using the style that onclick method defined in a seperate java files
+        TextView numbers = (TextView) findViewById(R.id.numbers);
+        numbers.setOnClickListener( new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+                Intent numberIntent = new Intent(MainActivity.this, NumbersActivity.class);
+                startActivity(numberIntent);
+            }
+        }
+        );
+
+
+        TextView colors = (TextView) findViewById(R.id.colors);
+        colors.setOnClickListener( new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+                Intent colorsIntent = new Intent(MainActivity.this, ColorsActivity.class);
+                startActivity(colorsIntent);
+            }
+        }
+        );
+
+        TextView phrases = (TextView) findViewById(R.id.phrases);
+        phrases.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent phraseIntent = new Intent(MainActivity.this, PhrasesActivity.class);
+                startActivity(phraseIntent);
+            }
+        });
+
+        TextView family = (TextView) findViewById(R.id.family);
+        family.setOnClickListener( new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+                Intent familyIntent = new Intent(MainActivity.this, FamilyActivity.class);
+                startActivity(familyIntent);
+            }
+        }
+
+        );
     }
 
-    public void openNumbersList(View view){
-        Intent intent = new Intent(this,NumbersActivity.class);
-        startActivity(intent);
-    }
 }
