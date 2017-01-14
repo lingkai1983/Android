@@ -1,8 +1,11 @@
 package com.example.android.miwok;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v7.app.AppCompatActivity;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+
+import java.util.ArrayList;
 
 public class NumbersActivity extends AppCompatActivity {
 
@@ -10,12 +13,24 @@ public class NumbersActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_number);
+        ArrayList<String> words = new ArrayList<String> ();
 
-        String[] words = {"One", "Two", "Three", "Four", "Five",
-                "Six", "Seven", "Eight", "Nine", "Ten"};
-        for (int i = 0; i < words.length; i++) {
-            Log.v("Number Activity", "Word at Index " + i + " is " + words[i]);
-        }
+        words.add("One");
+        words.add("Two");
+        words.add("Three");
+        words.add("Four");
+        words.add("Five");
+        words.add("Six");
+        words.add("Seven");
+        words.add("Eight");
+        words.add("Nine");
+        words.add("Ten");
+
+        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, words);
+
+         ListView listView = (ListView) findViewById(R.id.list);
+
+         listView.setAdapter(itemsAdapter);
 
     }
 }
