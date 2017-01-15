@@ -1,26 +1,28 @@
 package com.example.android.miwok;
 
-import java.util.ArrayList;
-
 /**
  * Created by lingk on 1/13/2017.
  */
 
 public class Word {
-   private String defaultWord;
-   private String miwokWord;
+    private String defaultWord;
+    private String miwokWord;
+    private int imgResourceID;
 
-    public Word(String defaultWord, String miwokWord){
+
+    public Word(String defaultWord, String miwokWord) {
         this.defaultWord = defaultWord;
         this.miwokWord = miwokWord;
 
     }
 
-    public String getDefaultWord(){
+    public String getDefaultWord() {
         return defaultWord;
     }
 
     public String getMiwokWord() {
         return miwokWord;
     }
+
+    public int getImgResourceID() {return imgResourceID;}
 }
