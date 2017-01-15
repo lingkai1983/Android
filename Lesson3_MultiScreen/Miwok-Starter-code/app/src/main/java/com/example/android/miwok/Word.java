@@ -8,12 +8,21 @@ public class Word {
     private String defaultWord;
     private String miwokWord;
     private int imgResourceID;
+    private  boolean ownImageID;
 
 
     public Word(String defaultWord, String miwokWord) {
         this.defaultWord = defaultWord;
         this.miwokWord = miwokWord;
+        this.ownImageID = false;
 
+    }
+
+    public  Word(String defaultWord, String miwokWord, int imgResourceID){
+        this.defaultWord = defaultWord;
+        this.miwokWord = miwokWord;
+        this.imgResourceID = imgResourceID;
+        this.ownImageID = true;
     }
 
     public String getDefaultWord() {
@@ -25,4 +34,6 @@ public class Word {
     }
 
     public int getImgResourceID() {return imgResourceID;}
+
+    public  boolean hasImageResourceID() { return  ownImageID; }
 }
