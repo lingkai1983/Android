@@ -15,6 +15,9 @@
  */
 package com.example.android.pets;
 
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
@@ -26,8 +29,10 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.example.android.pets.data.PetContract;
+import com.example.android.pets.data.PetDbHelper;
 
 /**
  * Allows user to create a new pet or edit an existing one.
@@ -119,7 +124,10 @@ public class EditorActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             // Respond to a click on the "Save" menu option
             case R.id.action_save:
-                // Do nothing for now
+                // insert one pet entry once user click save -- lingkai
+                insertPet();
+                // after entry been inserted, exit current active and return to previous -- lingkai
+                finish();
                 return true;
             // Respond to a click on the "Delete" menu option
             case R.id.action_delete:
@@ -132,5 +140,43 @@ public class EditorActivity extends AppCompatActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void insertPet(){
+
+        // get user inputs from TextView and Spinner
+        String petName = mNameEditText.getText().toString().trim();
+        String petBreed = mBreedEditText.getText().toString().trim();
+        String petWeightS = mWeightEditText.getText().toString().trim();
+        int    petWeightI = Integer.parseInt(petWeightS);
+        String petGender = mGenderSpinner.getSelectedItem().toString().trim();
+
+        // store user input into ContentValues
+        ContentValues values = new ContentValues();
+        values.put(PetContract.PetEntry.COLUMN_PET_NAME, petName);
+        values.put(PetContract.PetEntry.COLUMN_PET_BREED,petBreed);
+        values.put(PetContract.PetEntry.COLUMN_PET_GENDER, mGender); // once spinner been select, the value will inside mGender
+        values.put(PetContract.PetEntry.COLUMN_PET_WEIGHT,petWeightI);
+
+        // Create a db helper
+        PetDbHelper dbHelper = new PetDbHelper(this);
+        // create a db that can be written
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        long rowID = db.insert(PetContract.PetEntry.TABLE_NAME, null, values);
+
+        // Create a toast message once a row has been inserted
+        Context context = getApplicationContext();
+        int duration = Toast.LENGTH_SHORT;
+        String message;
+
+        if (rowID == -1)
+            message = "Error with saving pet";
+        else
+            message = "Pet Saved with id: " + rowID;
+
+        Toast toast = Toast.makeText(context,message,duration);
+        toast.show();
+
     }
 }
