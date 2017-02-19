@@ -17,7 +17,7 @@ package com.example.android.pets;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
@@ -32,7 +32,9 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.example.android.pets.data.PetContract;
-import com.example.android.pets.data.PetDbHelper;
+import com.example.android.pets.data.PetProvider;
+
+import static com.example.android.pets.data.PetContract.PetEntry.CONTENT_URI;
 
 /**
  * Allows user to create a new pet or edit an existing one.
@@ -50,6 +52,8 @@ public class EditorActivity extends AppCompatActivity {
 
     /** EditText field to enter the pet's gender */
     private Spinner mGenderSpinner;
+
+    private PetProvider mPetProvider;
 
     /**
      * Gender of the pet. The possible values are:
@@ -158,22 +162,18 @@ public class EditorActivity extends AppCompatActivity {
         values.put(PetContract.PetEntry.COLUMN_PET_GENDER, mGender); // once spinner been select, the value will inside mGender
         values.put(PetContract.PetEntry.COLUMN_PET_WEIGHT,petWeightI);
 
-        // Create a db helper
-        PetDbHelper dbHelper = new PetDbHelper(this);
-        // create a db that can be written
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-        long rowID = db.insert(PetContract.PetEntry.TABLE_NAME, null, values);
+        Uri uri = getContentResolver().insert(CONTENT_URI,values);
 
         // Create a toast message once a row has been inserted
         Context context = getApplicationContext();
         int duration = Toast.LENGTH_SHORT;
         String message;
 
-        if (rowID == -1)
+        if (uri == null)
             message = "Error with saving pet";
         else
-            message = "Pet Saved with id: " + rowID;
+            message = "Pet Saved with successful" ;
 
         Toast toast = Toast.makeText(context,message,duration);
         toast.show();
