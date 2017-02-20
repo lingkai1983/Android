@@ -25,10 +25,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.android.pets.data.PetContract.PetEntry;
 
+import static android.R.id.list;
 import static com.example.android.pets.data.PetContract.PetEntry.CONTENT_URI;
 
 /**
@@ -55,6 +57,7 @@ public class CatalogActivity extends AppCompatActivity {
             }
         });
 
+        ListView petListView = (ListView)findViewById(R.layout.list_item);
         // displayDatabaseInfo();
     }
 
