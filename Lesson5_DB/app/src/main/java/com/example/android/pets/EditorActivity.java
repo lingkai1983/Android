@@ -15,10 +15,12 @@
  */
 package com.example.android.pets;
 
+import android.app.AlertDialog;
 import android.app.LoaderManager;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.CursorLoader;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
@@ -83,6 +85,7 @@ public class EditorActivity extends AppCompatActivity  implements
             setTitle(getString(R.string.editor_activity_title_new_pet));
         } else {
             setTitle(getString(R.string.editor_activity_title_edit_pet));
+            getLoaderManager().initLoader(0, null, this);
         }
 
 
@@ -94,9 +97,6 @@ public class EditorActivity extends AppCompatActivity  implements
 
         setupSpinner();
 
-        mCursorAdapter = new PetCursorAdapter(this, null);
-        // Kick off the loader
-        getLoaderManager().initLoader(0, null, this);
     }
 
     /**
@@ -159,7 +159,7 @@ public class EditorActivity extends AppCompatActivity  implements
                 return true;
             // Respond to a click on the "Delete" menu option
             case R.id.action_delete:
-                // Do nothing for now
+                showDeleteConfirmationDialog();
                 return true;
             // Respond to a click on the "Up" arrow button in the app bar
             case android.R.id.home:
@@ -170,47 +170,116 @@ public class EditorActivity extends AppCompatActivity  implements
         return super.onOptionsItemSelected(item);
     }
 
-    private void savePet(){
-        // get user inputs from TextView and Spinner
-        String petName = mNameEditText.getText().toString().trim();
-        String petBreed = mBreedEditText.getText().toString().trim();
-        String petWeightS = mWeightEditText.getText().toString().trim();
-        int petWeightI = Integer.parseInt(petWeightS);
-        String petGender = mGenderSpinner.getSelectedItem().toString().trim();
+    /**
+     * Get user input from editor and save pet into database.
+     */
+    private void savePet() {
+        // Read from input fields
+        // Use trim to eliminate leading or trailing white space
+        String nameString = mNameEditText.getText().toString().trim();
+        String breedString = mBreedEditText.getText().toString().trim();
+        String weightString = mWeightEditText.getText().toString().trim();
+        int weight = Integer.parseInt(weightString);
 
-        // store user input into ContentValues
+        // Create a ContentValues object where column names are the keys,
+        // and pet attributes from the editor are the values.
         ContentValues values = new ContentValues();
-        values.put(PetContract.PetEntry.COLUMN_PET_NAME, petName);
-        values.put(PetContract.PetEntry.COLUMN_PET_BREED, petBreed);
-        values.put(PetContract.PetEntry.COLUMN_PET_GENDER, mGender); // once spinner been select, the value will inside mGender
-        values.put(PetContract.PetEntry.COLUMN_PET_WEIGHT, petWeightI);
+        values.put(PetContract.PetEntry.COLUMN_PET_NAME, nameString);
+        values.put(PetContract.PetEntry.COLUMN_PET_BREED, breedString);
+        values.put(PetContract.PetEntry.COLUMN_PET_GENDER, mGender);
+        values.put(PetContract.PetEntry.COLUMN_PET_WEIGHT, weight);
 
-        // Create a toast message once a row has been inserted
-        Context context = getApplicationContext();
-        int duration = Toast.LENGTH_SHORT;
-        String message;
+        // Determine if this is a new or existing pet by checking if mCurrentPetUri is null or not
+        if (currentPetUri == null) {
+            // This is a NEW pet, so insert a new pet into the provider,
+            // returning the content URI for the new pet.
+            Uri newUri = getContentResolver().insert(PetContract.PetEntry.CONTENT_URI, values);
 
-        if (currentPetUri == null) { // null means save a new one
-            Uri uri = getContentResolver().insert(CONTENT_URI, values);
+            // Show a toast message depending on whether or not the insertion was successful.
+            if (newUri == null) {
+                // If the new content URI is null, then there was an error with insertion.
+                Toast.makeText(this, getString(R.string.editor_insert_pet_failed),
+                        Toast.LENGTH_SHORT).show();
+            } else {
+                // Otherwise, the insertion was successful and we can display a toast.
+                Toast.makeText(this, getString(R.string.editor_insert_pet_successful),
+                        Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            // Otherwise this is an EXISTING pet, so update the pet with content URI: mCurrentPetUri
+            // and pass in the new ContentValues. Pass in null for the selection and selection args
+            // because mCurrentPetUri will already identify the correct row in the database that
+            // we want to modify.
+            int rowsAffected = getContentResolver().update(currentPetUri, values, null, null);
 
-            if (uri == null)
-                message = "Error with saving pet";
-            else
-                message = "Pet Saved with successful" ;
+            // Show a toast message depending on whether or not the update was successful.
+            if (rowsAffected == 0) {
+                // If no rows were affected, then there was an error with the update.
+                Toast.makeText(this, getString(R.string.editor_update_pet_failed),
+                        Toast.LENGTH_SHORT).show();
+            } else {
+                // Otherwise, the update was successful and we can display a toast.
+                Toast.makeText(this, getString(R.string.editor_update_pet_successful),
+                        Toast.LENGTH_SHORT).show();
+            }
         }
-        else {
-            int rowsAffected = getContentResolver().update(currentPetUri,values,null,null);
-
-            if (rowsAffected == 0)
-                message = "Error with update pet";
-            else
-                message = "Pet Updated successful" ;
-        }
-
-        Toast toast = Toast.makeText(context,message,duration);
-        toast.show();
-
     }
+
+
+    private void showDeleteConfirmationDialog() {
+        // Create an AlertDialog.Builder and set the message, and click listeners
+        // for the postivie and negative buttons on the dialog.
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.delete_dialog_msg);
+        builder.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked the "Delete" button, so delete the pet.
+                deletePet();
+            }
+        });
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked the "Cancel" button, so dismiss the dialog
+                // and continue editing the pet.
+                if (dialog != null) {
+                    dialog.dismiss();
+                }
+            }
+        });
+
+        // Create and show the AlertDialog
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    /**
+     * Perform the deletion of the pet in the database.
+     */
+    private void deletePet() {
+    // Defines a variable to contain the number of rows deleted
+        int mRowsDeleted = 0;
+
+
+    // Deletes the words that match the selection criteria
+        mRowsDeleted = getContentResolver().delete(
+                currentPetUri,   // the user dictionary content URI
+                null,                    // the column to select on
+                null             // the value to compare to
+        );
+
+        if (mRowsDeleted == 0) {
+            // If no rows were deleted, then there was an error with the delete.
+            Toast.makeText(this, getString(R.string.editor_delete_pet_failed),
+                    Toast.LENGTH_SHORT).show();
+        } else {
+            // Otherwise, the delete was successful and we can display a toast.
+            Toast.makeText(this, getString(R.string.editor_delete_pet_successful),
+                    Toast.LENGTH_SHORT).show();
+        }
+
+        finish();
+    }
+
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
@@ -225,7 +294,7 @@ public class EditorActivity extends AppCompatActivity  implements
 
         // This loader will execute the ContentProvider's query method on a background thread
         return new CursorLoader(this,   // Parent activity context
-                PetContract.PetEntry.CONTENT_URI,   // Provider content URI to query
+                currentPetUri,   // Provider content URI to query
                 projection,             // Columns to include in the resulting Cursor
                 null,                   // No selection clause
                 null,                   // No selection arguments
@@ -279,6 +348,10 @@ public class EditorActivity extends AppCompatActivity  implements
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        mCursorAdapter.swapCursor(null);
+        // If the loader is invalidated, clear out all the data from the input fields.
+        mNameEditText.setText("");
+        mBreedEditText.setText("");
+        mWeightEditText.setText("");
+        mGenderSpinner.setSelection(0); // Select "Unknown" gender
     }
 }

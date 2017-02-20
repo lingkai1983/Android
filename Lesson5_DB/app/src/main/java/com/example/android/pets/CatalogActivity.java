@@ -26,6 +26,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -76,7 +77,6 @@ public class CatalogActivity extends AppCompatActivity implements
         mCursorAdapter = new PetCursorAdapter(this, null);
         petListView.setAdapter(mCursorAdapter);
 
-
         petListView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id){
@@ -95,9 +95,9 @@ public class CatalogActivity extends AppCompatActivity implements
             }
         });
 
+
         // Kick off the loader
         getLoaderManager().initLoader(PET_LOADER, null, this);
-
     }
 
 
@@ -110,6 +110,11 @@ public class CatalogActivity extends AppCompatActivity implements
         values.put(PetEntry.COLUMN_PET_WEIGHT,7);
         Uri uri = getContentResolver().insert(CONTENT_URI, values);
 
+    }
+
+    private void deleteAllPets(){
+        int rowsBeenDeleted = getContentResolver().delete(PetEntry.CONTENT_URI,null,null);
+        Log.v("CatalogActivity", rowsBeenDeleted + " rows deleted from pet database");
     }
 
     @Override
@@ -131,7 +136,7 @@ public class CatalogActivity extends AppCompatActivity implements
                 return true;
             // Respond to a click on the "Delete all entries" menu option
             case R.id.action_delete_all_entries:
-                // Do nothing for now
+                deleteAllPets();
                 return true;
         }
         return super.onOptionsItemSelected(item);
