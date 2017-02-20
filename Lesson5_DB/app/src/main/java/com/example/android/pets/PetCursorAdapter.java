@@ -16,7 +16,7 @@ import com.example.android.pets.data.PetContract;
  * how to create list items for each row of pet data in the {@link Cursor}.
  */
 
-public class PetCursorAdapter extends CursorAdapter {
+public class PetCursorAdapter extends CursorAdapter  {
 
     /**
      * Constructs a new {@link PetCursorAdapter}.
